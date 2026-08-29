@@ -1,0 +1,51 @@
+/* emmy design tokens — sleek white, emerald accent */
+:root {
+  --em-ground: #F5F6F4;
+  --em-paper: #FFFFFF;
+  --em-ink: #171B18;
+  --em-muted: #68706B;
+  --em-faint: #9AA29C;
+  --em-line: #E4E8E4;
+  --em-accent: #1E6E53;
+  --em-accent-deep: #14523D;
+  --em-tint: #E9F2ED;
+  --em-danger: #A33B2E;
+  --em-danger-tint: #F8ECEA;
+
+  --em-serif: Georgia, "Times New Roman", serif;
+  --em-sans: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --em-mono: ui-monospace, "Cascadia Code", Consolas, Menlo, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--em-ground);
+  color: var(--em-ink);
+  font-family: var(--em-sans);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+  font-family: var(--em-sans);
+}
+
+input {
+  font-family: var(--em-sans);
+}
+
+input:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--em-accent);
+  outline-offset: 2px;
+}
+
+code {
+  font-family: var(--em-mono);
+}

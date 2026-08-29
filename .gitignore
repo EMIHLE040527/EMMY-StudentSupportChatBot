@@ -1,0 +1,40 @@
+# Secrets — never commit these
+.env
+backend/.env
+
+# Python
+backend/VirtualEnvironment/
+__pycache__/
+*.py[cod]
+
+# Node (frontend/.gitignore covers the rest)
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+# Environment variables and secrets
+.env
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+VirtualEnvironment/
+venv/
+.venv/
+
+# Node
+node_modules/
+dist/
+build/
+
+# Editor / OS
+.vscode/
+.DS_Store
+
+# Logs
+*.log
+~$*
+# Uploaded study documents
+backend/uploads/
