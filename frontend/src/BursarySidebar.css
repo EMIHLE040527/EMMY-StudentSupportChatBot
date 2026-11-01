@@ -1,0 +1,359 @@
+.bursary-sidebar {
+  width: 360px;
+  height: 100%;
+  overflow-y: auto;
+  background: #ffffff;
+  border-left: 1px solid #e5e7eb;
+  padding: 20px;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+.bursary-header {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 25px;
+}
+
+.bursary-icon {
+  width: 45px;
+  height: 45px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f4ff;
+  font-size: 23px;
+}
+
+.bursary-header h2 {
+  margin: 0 0 5px;
+  font-size: 19px;
+  color: #222;
+}
+
+.bursary-header p {
+  margin: 0;
+  color: #777;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.upload-box {
+  border: 2px dashed #cfd6e4;
+  border-radius: 14px;
+  padding: 25px 15px;
+  text-align: center;
+}
+
+.upload-icon {
+  font-size: 35px;
+  margin-bottom: 10px;
+}
+
+.upload-box h3 {
+  margin: 5px 0;
+  font-size: 16px;
+}
+
+.upload-box p {
+  color: #777;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.upload-button {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px 16px;
+  background: #4f46e5;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.upload-button:hover {
+  opacity: 0.9;
+}
+
+.selected-file {
+  margin-top: 15px;
+  padding: 10px;
+  background: #f5f7fa;
+  border-radius: 8px;
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  word-break: break-word;
+}
+
+.bursary-error {
+  margin-top: 15px;
+  padding: 12px;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #be123c;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.find-bursaries-button {
+  width: 100%;
+  margin-top: 15px;
+  padding: 13px;
+  border: none;
+  border-radius: 9px;
+  background: #4f46e5;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.find-bursaries-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loading-section {
+  text-align: center;
+  padding: 35px 15px;
+}
+
+.loading-section h3 {
+  font-size: 15px;
+}
+
+.loading-section p {
+  color: #777;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.spinner {
+  width: 35px;
+  height: 35px;
+  border: 4px solid #ddd;
+  border-top: 4px solid #4f46e5;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.student-summary {
+  background: #f8f9ff;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.student-summary h3 {
+  margin-top: 0;
+  font-size: 15px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 12px;
+}
+
+.summary-item span {
+  color: #777;
+}
+
+.summary-item strong {
+  text-align: right;
+}
+
+.average-box {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.average-box span {
+  font-size: 13px;
+  color: #555;
+}
+
+.average-box strong {
+  font-size: 21px;
+  color: #4f46e5;
+}
+
+.marks-found {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #777;
+}
+
+.results-header h3 {
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.results-header p {
+  color: #777;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.bursary-card {
+  margin-top: 15px;
+  border: 1px solid #e1e4eb;
+  border-radius: 12px;
+  padding: 15px;
+  background: white;
+}
+
+.bursary-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.bursary-card-header h4 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.bursary-card-header p {
+  margin: 4px 0;
+  font-size: 11px;
+  color: #777;
+}
+
+.match-badge {
+  background: #dcfce7;
+  color: #166534;
+  padding: 5px 7px;
+  border-radius: 6px;
+  font-size: 9px;
+  font-weight: bold;
+  height: fit-content;
+  white-space: nowrap;
+}
+
+.bursary-description {
+  color: #666;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.requirement,
+.your-average {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.check {
+  color: green;
+  font-weight: bold;
+}
+
+.why-match {
+  margin-top: 12px;
+  padding: 10px;
+  background: #f8fafc;
+  border-radius: 8px;
+  font-size: 11px;
+}
+
+.why-match ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+.why-match li {
+  margin-bottom: 4px;
+}
+
+.bursary-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.view-button,
+.reminder-button {
+  flex: 1;
+  padding: 9px;
+  border-radius: 7px;
+  text-align: center;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.view-button {
+  background: #4f46e5;
+  color: white;
+  text-decoration: none;
+}
+
+.reminder-button {
+  background: #f1f5f9;
+  border: none;
+  color: #333;
+}
+
+.no-matches {
+  text-align: center;
+  padding: 25px 10px;
+}
+
+.no-matches div {
+  font-size: 35px;
+}
+
+.no-matches h3 {
+  font-size: 15px;
+}
+
+.no-matches p {
+  color: #777;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.important-note {
+  margin-top: 20px;
+  padding: 12px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 9px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.important-note p {
+  margin-bottom: 0;
+}
+
+.start-again {
+  width: 100%;
+  margin-top: 15px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+}

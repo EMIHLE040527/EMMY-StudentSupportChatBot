@@ -1,0 +1,404 @@
+
+/* ==========================================
+   EMMY - MODERN STUDY NOTES UPLOAD PAGE
+   ========================================== */
+
+.emmy-notes-page {
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  padding: 45px 24px 65px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background: #f5faf6;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.emmy-notes-page *,
+.emmy-notes-page *::before,
+.emmy-notes-page *::after {
+  box-sizing: border-box;
+}
+
+/* MAIN WHITE CARD */
+
+.emmy-notes-card {
+  width: 100%;
+  max-width: 660px;
+  padding: 38px 42px 32px;
+  background: #ffffff;
+  border: 1px solid #e0ebe2;
+  border-radius: 26px;
+  box-shadow:
+    0 10px 35px rgba(35, 85, 54, 0.06),
+    0 2px 8px rgba(35, 85, 54, 0.03);
+}
+
+/* HEADER */
+
+.emmy-notes-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.emmy-notes-icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 22px;
+  background: #e8f4eb;
+  color: #277d54;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+}
+
+.emmy-notes-header h2 {
+  font-size: 29px;
+  line-height: 1.25;
+  font-weight: 750;
+  color: #203b2b;
+  margin: 0 0 12px;
+}
+
+.emmy-notes-header p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #718477;
+  max-width: 410px;
+  margin: 0 auto;
+}
+
+/* HIDDEN NATIVE INPUT */
+
+.emmy-file-input {
+  display: none;
+}
+
+/* DRAG AND DROP AREA */
+
+.emmy-upload-zone {
+  background: #fafdfb;
+  border: 2px dashed #c4dccb;
+  border-radius: 22px;
+  padding: 36px 20px 32px;
+  text-align: center;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.emmy-upload-zone.dragging {
+  border-color: #278055;
+  background: #edf8ef;
+  transform: scale(1.01);
+}
+
+.emmy-upload-zone.has-file {
+  border-color: #7fb899;
+  background: #f7fcf8;
+}
+
+.emmy-upload-cloud {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  color: #278055;
+  background: #e9f5ed;
+  border-radius: 22px;
+}
+
+.emmy-upload-zone h3 {
+  color: #294532;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 9px;
+}
+
+.emmy-upload-zone p {
+  color: #7c8b80;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 23px;
+}
+
+/* ROUNDED BROWSE BUTTON */
+
+.emmy-browse-button {
+  border: 1px solid #b7d4c1;
+  border-radius: 50px;
+  background: #ffffff;
+  color: #277d54;
+  padding: 13px 27px;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.emmy-browse-button:hover:not(:disabled) {
+  background: #e9f5ed;
+  border-color: #278055;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(39, 125, 84, 0.1);
+}
+
+.emmy-browse-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.emmy-supported-types {
+  display: block;
+  color: #8c9d91;
+  font-size: 12px;
+  margin-top: 17px;
+  line-height: 1.5;
+}
+
+/* SELECTED FILE */
+
+.emmy-selected-file {
+  margin-top: 19px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 15px;
+  background: #f1f8f3;
+  border: 1px solid #d5e8db;
+  border-radius: 17px;
+}
+
+.emmy-selected-file-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 23px;
+  flex-shrink: 0;
+}
+
+.emmy-selected-file-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.emmy-selected-file-info strong {
+  color: #254c35;
+  font-size: 14px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.emmy-selected-file-info span {
+  color: #829388;
+  font-size: 12px;
+}
+
+/* REMOVE FILE BUTTON */
+
+.emmy-remove-file {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  background: #ffffff;
+  border: 1px solid #dce8df;
+  border-radius: 50%;
+  color: #748a7b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.emmy-remove-file:hover:not(:disabled) {
+  background: #fcebed;
+  border-color: #f2c6ca;
+  color: #c4444b;
+}
+
+/* MAIN UPLOAD BUTTON */
+
+.emmy-upload-button {
+  margin-top: 22px;
+  width: 100%;
+  min-height: 54px;
+  border: none;
+  border-radius: 50px;
+  background: #287f55;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 750;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.emmy-upload-button:hover:not(:disabled) {
+  background: #1e6745;
+  transform: translateY(-2px);
+  box-shadow: 0 7px 18px rgba(40, 127, 85, 0.22);
+}
+
+.emmy-upload-button:disabled {
+  background: #c7d8cd;
+  color: #ffffff;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* LOADING ANIMATION */
+
+.emmy-upload-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: emmy-notes-spin 0.7s linear infinite;
+}
+
+@keyframes emmy-notes-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* STATUS MESSAGES */
+
+.emmy-notes-message {
+  margin-top: 18px;
+  border-radius: 15px;
+  padding: 15px 17px;
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.emmy-message-icon {
+  width: 23px;
+  height: 23px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.emmy-notes-message.success {
+  background: #eaf7ef;
+  border: 1px solid #cae7d5;
+  color: #247344;
+}
+
+.emmy-notes-message.success .emmy-message-icon {
+  background: #2c8758;
+  color: #ffffff;
+}
+
+.emmy-notes-message.error {
+  background: #fff1f1;
+  border: 1px solid #f3d5d5;
+  color: #a13d3d;
+}
+
+.emmy-notes-message.error .emmy-message-icon {
+  background: #d95c5c;
+  color: #ffffff;
+}
+
+.emmy-notes-message.loading {
+  background: #f2f6fc;
+  border: 1px solid #dce6f5;
+  color: #44678e;
+}
+
+.emmy-notes-message.loading .emmy-message-icon {
+  background: #dae8fa;
+  color: #44678e;
+}
+
+/* FOOTER */
+
+.emmy-notes-footer {
+  margin-top: 22px;
+  text-align: center;
+  font-size: 12px;
+  color: #91a096;
+  line-height: 1.6;
+}
+
+.emmy-notes-footer span {
+  margin-right: 5px;
+}
+
+/* ACCESSIBILITY */
+
+.emmy-browse-button:focus-visible,
+.emmy-upload-button:focus-visible,
+.emmy-remove-file:focus-visible {
+  outline: 3px solid #92c7a5;
+  outline-offset: 3px;
+}
+
+/* SMALLER SCREENS */
+
+@media (max-width: 650px) {
+  .emmy-notes-page {
+    padding: 22px 12px 35px;
+  }
+
+  .emmy-notes-card {
+    padding: 27px 20px;
+    border-radius: 20px;
+  }
+
+  .emmy-notes-header h2 {
+    font-size: 24px;
+  }
+
+  .emmy-upload-zone {
+    padding: 29px 15px;
+  }
+
+  .emmy-upload-zone h3 {
+    font-size: 16px;
+  }
+
+  .emmy-notes-icon {
+    width: 60px;
+    height: 60px;
+  }
+}

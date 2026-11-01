@@ -1,0 +1,548 @@
+/* =====================================================
+   LISTEN & LEARN PAGE
+   ===================================================== */
+
+.listen-learn-page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 25px;
+  box-sizing: border-box;
+  background: #f5f7fb;
+}
+
+
+/* =====================================================
+   HEADER
+   ===================================================== */
+
+.listen-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.listen-header h1 {
+  margin: 0;
+  font-size: 30px;
+  color: #202938;
+}
+
+.listen-header p {
+  margin-top: 6px;
+  color: #687386;
+}
+
+
+/* =====================================================
+   CREATE LESSON BUTTON
+   ===================================================== */
+
+.create-lesson-button {
+  border: none;
+  background: #4f46e5;
+  color: white;
+  padding: 13px 22px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.create-lesson-button:hover {
+  transform: translateY(-2px);
+}
+
+.create-lesson-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+/* =====================================================
+   ERROR
+   ===================================================== */
+
+.listen-error {
+  background: #fff0f0;
+  color: #b42318;
+  border: 1px solid #f5c2c0;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 20px;
+}
+
+
+/* =====================================================
+   SCENE
+   ===================================================== */
+
+.lesson-scene-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.anime-scene {
+  position: relative;
+
+  width: 100%;
+  max-width: 1100px;
+
+  aspect-ratio: 1612 / 761;
+
+  background-size: cover;
+  background-position: center;
+
+  border-radius: 20px;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 15px 40px rgba(0, 0, 0, 0.20);
+}
+
+
+/* =====================================================
+   CHARACTER AREAS
+   ===================================================== */
+
+.character-zone {
+  position: absolute;
+
+  width: 32%;
+  height: 70%;
+
+  bottom: 8%;
+
+  pointer-events: none;
+
+  border-radius: 30px;
+
+  transition: 0.3s ease;
+}
+
+
+/* STUDENT IS ON THE LEFT */
+
+.student-zone {
+  left: 5%;
+}
+
+
+/* TUTOR IS ON THE RIGHT */
+
+.tutor-zone {
+  right: 5%;
+}
+
+
+/* =====================================================
+   CHARACTER LABELS
+   ===================================================== */
+
+.character-label {
+  position: absolute;
+
+  bottom: 5px;
+
+  padding: 8px 14px;
+
+  border-radius: 20px;
+
+  background: rgba(255, 255, 255, 0.92);
+
+  font-size: 14px;
+  font-weight: 700;
+
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.student-label {
+  left: 15px;
+}
+
+.tutor-label {
+  right: 15px;
+}
+
+
+/* =====================================================
+   ACTIVE SPEAKER
+   ===================================================== */
+
+.active-character {
+  animation: speakerGlow 1.2s infinite alternate;
+}
+
+
+@keyframes speakerGlow {
+
+  from {
+    box-shadow:
+      0 0 0 rgba(79, 70, 229, 0);
+  }
+
+  to {
+    box-shadow:
+      0 0 25px rgba(79, 70, 229, 0.45);
+  }
+
+}
+
+
+/* =====================================================
+   SPEECH BUBBLE
+   ===================================================== */
+
+.speech-bubble {
+  position: absolute;
+
+  z-index: 10;
+
+  width: 300px;
+
+  padding: 18px;
+
+  border-radius: 18px;
+
+  background: rgba(255, 255, 255, 0.96);
+
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.18);
+
+  animation: bubbleAppear 0.3s ease;
+}
+
+
+@keyframes bubbleAppear {
+
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+}
+
+
+/* TUTOR SPEECH */
+
+.tutor-bubble {
+  right: 7%;
+  top: 10%;
+}
+
+
+/* STUDENT SPEECH */
+
+.student-bubble {
+  left: 7%;
+  top: 10%;
+}
+
+
+/* =====================================================
+   SPEECH BUBBLE TRIANGLE
+   ===================================================== */
+
+.tutor-bubble::after {
+  content: "";
+
+  position: absolute;
+
+  bottom: -18px;
+  right: 55px;
+
+  width: 0;
+  height: 0;
+
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-top: 20px solid rgba(255, 255, 255, 0.96);
+}
+
+
+.student-bubble::after {
+  content: "";
+
+  position: absolute;
+
+  bottom: -18px;
+  left: 55px;
+
+  width: 0;
+  height: 0;
+
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-top: 20px solid rgba(255, 255, 255, 0.96);
+}
+
+
+/* =====================================================
+   BUBBLE CONTENT
+   ===================================================== */
+
+.bubble-speaker {
+  font-size: 14px;
+
+  font-weight: 800;
+
+  margin-bottom: 8px;
+
+  color: #4f46e5;
+}
+
+.bubble-text {
+  color: #202938;
+
+  font-size: 16px;
+
+  line-height: 1.55;
+}
+
+
+/* =====================================================
+   CURRENT SPEAKER
+   ===================================================== */
+
+.current-speaker {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  margin-top: 18px;
+
+  font-weight: 700;
+
+  color: #343b4a;
+}
+
+
+/* =====================================================
+   SOUND WAVE
+   ===================================================== */
+
+.sound-wave {
+  display: flex;
+
+  align-items: center;
+
+  gap: 3px;
+
+  height: 25px;
+}
+
+.sound-wave span {
+  width: 4px;
+
+  height: 10px;
+
+  background: #4f46e5;
+
+  border-radius: 5px;
+
+  animation: soundWave 0.8s infinite ease-in-out;
+}
+
+.sound-wave span:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.sound-wave span:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.sound-wave span:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+.sound-wave span:nth-child(5) {
+  animation-delay: 0.4s;
+}
+
+
+@keyframes soundWave {
+
+  0%,
+  100% {
+    height: 7px;
+  }
+
+  50% {
+    height: 23px;
+  }
+
+}
+
+
+/* =====================================================
+   CONTROLS
+   ===================================================== */
+
+.lesson-controls {
+  display: flex;
+
+  justify-content: center;
+
+  gap: 10px;
+
+  flex-wrap: wrap;
+
+  margin-top: 20px;
+}
+
+.lesson-controls button {
+  border: none;
+
+  background: white;
+
+  color: #303746;
+
+  padding: 10px 17px;
+
+  border-radius: 9px;
+
+  cursor: pointer;
+
+  font-weight: 600;
+
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.08);
+
+  transition: 0.2s;
+}
+
+.lesson-controls button:hover {
+  background: #4f46e5;
+
+  color: white;
+
+  transform: translateY(-2px);
+}
+
+
+/* =====================================================
+   PROGRESS
+   ===================================================== */
+
+.lesson-progress {
+  width: 100%;
+
+  max-width: 700px;
+
+  margin: 20px auto 0;
+}
+
+.progress-text {
+  text-align: center;
+
+  margin-bottom: 8px;
+
+  font-size: 14px;
+
+  color: #6b7280;
+}
+
+.progress-bar {
+  height: 8px;
+
+  background: #e5e7eb;
+
+  border-radius: 20px;
+
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+
+  background: #4f46e5;
+
+  border-radius: 20px;
+
+  transition: width 0.4s ease;
+}
+
+
+/* =====================================================
+   EMPTY STATE
+   ===================================================== */
+
+.listen-empty {
+  text-align: center;
+
+  padding: 50px 20px;
+
+  color: #687386;
+}
+
+.empty-icon {
+  font-size: 50px;
+
+  margin-bottom: 10px;
+}
+
+.listen-empty h2 {
+  color: #202938;
+}
+
+
+/* =====================================================
+   MOBILE
+   ===================================================== */
+
+@media (max-width: 800px) {
+
+  .listen-header {
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 15px;
+  }
+
+  .speech-bubble {
+    width: 230px;
+
+    padding: 12px;
+  }
+
+  .bubble-text {
+    font-size: 13px;
+  }
+
+  .character-label {
+    font-size: 11px;
+
+    padding: 6px 9px;
+  }
+
+}
+
+
+@media (max-width: 550px) {
+
+  .listen-learn-page {
+    padding: 12px;
+  }
+
+  .speech-bubble {
+    width: 180px;
+  }
+
+  .bubble-text {
+    font-size: 11px;
+  }
+
+}
