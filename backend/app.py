@@ -29,7 +29,10 @@ from flask import request, jsonify
 
 app = Flask(__name__)
 
-CORS(app, origins=["http://localhost:3000"])
+CORS(app, origins=[
+    "http://localhost:3000",
+    "https://emmy-frontend.onrender.com"
+])
 
 load_dotenv(dotenv_path=Path(__file__).with_name(".env"))
 
