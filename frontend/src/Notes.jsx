@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import "./Notes.css";
 
-const API = "http://127.0.0.1:5000";
+const API = "https://emmy-backend-7i0m.onrender.com";
 
 const ALLOWED_EXTENSIONS = [
   ".pdf",

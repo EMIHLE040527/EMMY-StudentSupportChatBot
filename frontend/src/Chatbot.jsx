@@ -21,7 +21,7 @@ import ListenAndLearn from "./ListenAndLearn";
 import StudyBreakManager from "./StudyBreakManager";
 import ColoringGame from "./ColoringGame";
 import Feedback from "./Feedback";
-const API = "http://127.0.0.1:5000";
+const API = "https://emmy-backend-7i0m.onrender.com";
 
 const SUGGESTIONS = [
   "Explain photosynthesis simply",
