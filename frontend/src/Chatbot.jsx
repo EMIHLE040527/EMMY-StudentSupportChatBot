@@ -501,105 +501,149 @@ export default function Chatbot({ user, onLogout }) {
    * ==============================
    */
 
-  useEffect(() => {
-    async function loadWeather() {
-      try {
-        const location =
-          localStorage.getItem(
-            "emmy_location"
-          );
+  
 
-        const latitude =
-          localStorage.getItem(
-            "emmy_latitude"
-          );
+useEffect(() => {
+  let cancelled = false;
 
-        const longitude =
-          localStorage.getItem(
-            "emmy_longitude"
-          );
-
-        if (!latitude || !longitude) {
-          setWeather(null);
-          return;
+  async function loadWeather() {
+    try {
+      // STEP 1: Retrieve the saved profile from Aiven
+      const profileResponse = await axios.get(`${API}/profile`, {
+        params: {
+          user_id: user.userId
         }
+      });
 
-        const response = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=auto`
+      const profile = profileResponse.data;
+
+      const location =
+        typeof profile.location === "string"
+          ? profile.location.trim()
+          : "";
+
+      let latitude = profile.latitude;
+      let longitude = profile.longitude;
+
+      // STEP 2: If coordinates are missing, look up the city
+      if (
+        (latitude == null || latitude === "" ||
+         longitude == null || longitude === "") &&
+        location
+      ) {
+        const geoResponse = await fetch(
+          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=1&language=en&format=json`
         );
 
-        if (!response.ok) {
-          throw new Error(
-            "Weather request failed"
-          );
+        if (!geoResponse.ok) {
+          throw new Error("Location lookup failed");
         }
 
-        const data = await response.json();
+        const geoData = await geoResponse.json();
 
-        const weatherCode =
-          data.current.weather_code;
-
-        let condition = "Clear";
-
-        if ([1, 2].includes(weatherCode)) {
-          condition = "Partly cloudy";
-        } else if (weatherCode === 3) {
-          condition = "Overcast";
-        } else if (
-          [51, 53, 55, 56, 57].includes(
-            weatherCode
-          )
-        ) {
-          condition = "Drizzle";
-        } else if (
-          [
-            61, 63, 65, 66, 67,
-            80, 81, 82
-          ].includes(weatherCode)
-        ) {
-          condition = "Rain";
-        } else if (
-          [95, 96, 99].includes(weatherCode)
-        ) {
-          condition = "Thunderstorm";
-        } else if (
-          [
-            71, 73, 75, 77, 85, 86
-          ].includes(weatherCode)
-        ) {
-          condition = "Snow";
-        } else if (
-          [45, 48].includes(weatherCode)
-        ) {
-          condition = "Fog";
+        if (!geoData.results || geoData.results.length === 0) {
+          throw new Error("Location not found: " + location);
         }
 
+        latitude = geoData.results[0].latitude;
+        longitude = geoData.results[0].longitude;
+      }
+
+      // STEP 3: Stop if no valid coordinates are available
+      if (
+        latitude == null ||
+        longitude == null ||
+        latitude === "" ||
+        longitude === "" ||
+        !Number.isFinite(Number(latitude)) ||
+        !Number.isFinite(Number(longitude))
+      ) {
+        if (!cancelled) {
+          setWeather(null);
+        }
+        return;
+      }
+
+      // STEP 4: Request live weather from Open-Meteo
+      const response = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=auto`
+      );
+
+      if (!response.ok) {
+        throw new Error("Weather request failed");
+      }
+
+      const data = await response.json();
+
+      if (
+        !data.current ||
+        !data.daily ||
+        !data.daily.temperature_2m_max?.length ||
+        !data.daily.temperature_2m_min?.length
+      ) {
+        throw new Error("Weather data is incomplete");
+      }
+
+      // STEP 5: Convert weather code into a description
+      const weatherCode = data.current.weather_code;
+
+      let condition = "Clear";
+
+      if ([1, 2].includes(weatherCode)) {
+        condition = "Partly cloudy";
+      } else if (weatherCode === 3) {
+        condition = "Overcast";
+      } else if (
+        [51, 53, 55, 56, 57].includes(weatherCode)
+      ) {
+        condition = "Drizzle";
+      } else if (
+        [61, 63, 65, 66, 67, 80, 81, 82].includes(weatherCode)
+      ) {
+        condition = "Rain";
+      } else if (
+        [95, 96, 99].includes(weatherCode)
+      ) {
+        condition = "Thunderstorm";
+      } else if (
+        [71, 73, 75, 77, 85, 86].includes(weatherCode)
+      ) {
+        condition = "Snow";
+      } else if (
+        [45, 48].includes(weatherCode)
+      ) {
+        condition = "Fog";
+      }
+
+      // STEP 6: Update the existing weather card
+      if (!cancelled) {
         setWeather({
           city: location || "Your location",
           condition,
-          temperature:
-            data.current.temperature_2m,
-          wind_speed:
-            data.current.wind_speed_10m,
+          temperature: data.current.temperature_2m,
+          wind_speed: data.current.wind_speed_10m,
           forecast: {
-            max:
-              data.daily.temperature_2m_max,
-            min:
-              data.daily.temperature_2m_min
+            max: data.daily.temperature_2m_max,
+            min: data.daily.temperature_2m_min
           }
         });
-      } catch (error) {
-        console.error(
-          "Failed to load weather:",
-          error
-        );
+      }
 
+    } catch (error) {
+      console.error("Failed to load weather:", error);
+
+      if (!cancelled) {
         setWeather(null);
       }
     }
+  }
 
-    loadWeather();
-  }, []);
+  loadWeather();
+
+  return () => {
+    cancelled = true;
+  };
+}, [user.userId]);
 
   /*
    * ==============================
