@@ -37,4 +37,6 @@ RUN tesseract --version
 COPY . .
 
 # Start the Flask application using Gunicorn
-CMD ["sh", "-c", "gunicorn --capture-output --enable-stdio-inheritance --bind 0.0.0.0:${PORT:-10000} app:app"]
+
+CMD ["sh", "-c", "gunicorn --capture-output --enable-stdio-inheritance --timeout 120 --workers 1 --bind 0.0.0.0:${PORT:-10000} app:app"]
+
