@@ -182,12 +182,15 @@ def extract_pdf_text(file):
 
 
 # ============================================================
-# OCR PDF (FOR SCANNED DOCUMENTS)
+# OCR PDF (UPDATED FOR RENDER)
 # ============================================================
 
 def ocr_pdf(file):
+    """
+    Read scanned PDF pages using low-memory OCR on Render.
+    """
     if pymupdf is None or pytesseract is None or Image is None:
-        print("OCR Python libraries are unavailable")
+        print("OCR Python libraries are unavailable", flush=True)
         return ""
 
     if not configure_tesseract():
@@ -197,7 +200,6 @@ def ocr_pdf(file):
 
     try:
         file.seek(0)
-
         pdf = pymupdf.open(
             stream=file.read(),
             filetype="pdf"
@@ -205,60 +207,84 @@ def ocr_pdf(file):
 
         pages = []
 
-        print("OCR PDF page count:", len(pdf))
+        print("OCR PDF page count:", len(pdf), flush=True)
 
         for number, page in enumerate(pdf, start=1):
             try:
-                # Moderate resolution for Render memory.
+                # Render pages in grayscale to reduce RAM.
+                # Limit image resolution to avoid large images.
+                longest_side = max(
+                    page.rect.width,
+                    page.rect.height
+                )
+
+                zoom = min(
+                    1.5,
+                    1800 / max(longest_side, 1)
+                )
+
                 pix = page.get_pixmap(
-                    matrix=pymupdf.Matrix(2, 2),
+                    matrix=pymupdf.Matrix(zoom, zoom),
+                    colorspace=pymupdf.csGRAY,
                     alpha=False
                 )
 
                 img = Image.frombytes(
-                    "RGB",
+                    "L",
                     (pix.width, pix.height),
                     pix.samples
                 )
 
-                img = ImageOps.grayscale(img)
+                del pix
 
-                img = ImageEnhance.Contrast(
-                    img
-                ).enhance(2.0)
-
-                img = ImageEnhance.Sharpness(
-                    img
-                ).enhance(2.0)
-
+                # Stop OCR if processing takes too long.
                 text = pytesseract.image_to_string(
                     img,
-                    config="--oem 3 --psm 6",
-                    lang="eng"
+                    config="--oem 1 --psm 6",
+                    lang="eng",
+                    timeout=35
                 )
 
+                del img
+
                 print(
-                    f"OCR page {number}: {len(text)} characters"
+                    f"OCR page {number}: "
+                    f"{len(text)} characters",
+                    flush=True
                 )
 
                 if text.strip():
                     pages.append(text)
 
+            except RuntimeError as error:
+                print(
+                    f"OCR page {number} failed or timed out:",
+                    type(error).__name__,
+                    flush=True
+                )
+
             except Exception as error:
                 print(
-                    "OCR page failed:",
-                    type(error).__name__
+                    f"OCR page {number} failed:",
+                    type(error).__name__,
+                    flush=True
                 )
 
         result = "\n".join(pages)
 
-        print("Total OCR text length:", len(result))
+        print(
+            "Total OCR text length:",
+            len(result),
+            flush=True
+        )
+
         return result
 
     except Exception as error:
         print(
             "OCR extraction failed:",
-            type(error).__name__
+            type(error).__name__,
+            flush=True
         )
         return ""
 
@@ -589,7 +615,7 @@ def _academic_score(text):
 
 
 # ============================================================
-# MAIN FILE EXTRACTION - UPDATED
+# MAIN FILE EXTRACTION
 # ============================================================
 
 def extract_transcript_text(file, filename):
