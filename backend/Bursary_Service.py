@@ -1,6 +1,7 @@
 
 import os
 import re
+from io import BytesIO
 
 from pypdf import PdfReader
 from docx import Document
@@ -154,7 +155,10 @@ def extract_pdf_text(file):
         for number, page in enumerate(reader.pages, start=1):
             try:
                 text = page.extract_text() or ""
-                print(f"PDF page {number}: {len(text)} characters")
+
+                print(
+                    f"PDF page {number}: {len(text)} characters"
+                )
 
                 if text.strip():
                     pages.append(text)
@@ -166,6 +170,7 @@ def extract_pdf_text(file):
                 )
 
         extracted = "\n".join(pages)
+
         print("Normal PDF text length:", len(extracted))
         return extracted
 
@@ -178,70 +183,113 @@ def extract_pdf_text(file):
 
 
 # ============================================================
-# OCR PDF - UPDATED FOR RENDER
+# OCR PDF - FIXED FOR SCANNED TRANSCRIPTS ON RENDER
 # ============================================================
 
 def ocr_pdf(file):
     """
-    Read scanned PDF pages using lower-memory OCR on Render.
+    OCR original scanned PDF images instead of shrinking
+    the entire page.
+
+    Scanned PDFs often contain a high-resolution embedded
+    image. Reading that image directly preserves academic
+    marks and avoids unnecessary page-rasterization work.
     """
+
     if pymupdf is None or pytesseract is None or Image is None:
-        print("OCR Python libraries are unavailable", flush=True)
+        print(
+            "OCR Python libraries are unavailable",
+            flush=True
+        )
         return ""
 
     if not configure_tesseract():
         return ""
 
+    # Restrict Tesseract's CPU thread usage on Render.
+    os.environ["OMP_THREAD_LIMIT"] = "1"
+
     pdf = None
 
     try:
         file.seek(0)
+
         pdf = pymupdf.open(
             stream=file.read(),
             filetype="pdf"
         )
 
         pages = []
-        print("OCR PDF page count:", len(pdf), flush=True)
+
+        print(
+            "OCR PDF page count:",
+            len(pdf),
+            flush=True
+        )
 
         for number, page in enumerate(pdf, start=1):
             try:
-                # Reduce image resolution to lower memory usage.
-                longest_side = max(
-                    page.rect.width,
-                    page.rect.height
-                )
+                image_data = None
 
-                zoom = min(
-                    1.0,
-                    1200 / max(longest_side, 1)
-                )
+                # Find the largest embedded scan on the page.
+                candidates = []
 
-                # Use grayscale to reduce image memory.
-                pix = page.get_pixmap(
-                    matrix=pymupdf.Matrix(zoom, zoom),
-                    colorspace=pymupdf.csGRAY,
-                    alpha=False
-                )
+                for item in page.get_images(full=True):
+                    xref = item[0]
+                    width, height = item[2], item[3]
 
-                img = Image.frombytes(
-                    "L",
-                    (pix.width, pix.height),
-                    pix.samples
-                )
+                    if width >= 500 and height >= 500:
+                        candidates.append(
+                            (width * height, xref)
+                        )
 
-                del pix
+                if candidates:
+                    _, xref = max(candidates)
 
-                # PSM 11 recognises sparse text.
-                # Timeout prevents OCR running indefinitely.
+                    image_data = pdf.extract_image(
+                        xref
+                    )["image"]
+
+                    print(
+                        f"OCR page {number}: using embedded scan",
+                        flush=True
+                    )
+
+                if image_data is not None:
+                    with Image.open(
+                        BytesIO(image_data)
+                    ) as source:
+                        img = source.convert("L")
+
+                else:
+                    # Fallback for PDFs without embedded scans.
+                    pix = page.get_pixmap(
+                        matrix=pymupdf.Matrix(1.5, 1.5),
+                        colorspace=pymupdf.csGRAY,
+                        alpha=False,
+                    )
+
+                    img = Image.frombytes(
+                        "L",
+                        (pix.width, pix.height),
+                        pix.samples
+                    )
+
+                    del pix
+
+                # Reduce extremely large images only.
+                # Do not enlarge smaller scanned images.
+                if max(img.size) > 3000:
+                    img.thumbnail((3000, 3000))
+
                 text = pytesseract.image_to_string(
                     img,
-                    config="--oem 1 --psm 11",
+                    config="--oem 1 --psm 6",
                     lang="eng",
-                    timeout=45
+                    timeout=45,
                 )
 
-                del img
+                img.close()
 
                 print(
                     f"OCR page {number}: {len(text)} characters",
@@ -253,15 +301,15 @@ def ocr_pdf(file):
 
             except RuntimeError as error:
                 print(
-                    f"OCR page {number} failed or timed out:",
-                    type(error).__name__,
+                    f"OCR page {number} failed or timed out: "
+                    f"{error}",
                     flush=True
                 )
 
             except Exception as error:
                 print(
-                    f"OCR page {number} failed:",
-                    type(error).__name__,
+                    f"OCR page {number} failed: "
+                    f"{type(error).__name__}: {error}",
                     flush=True
                 )
 
@@ -272,6 +320,7 @@ def ocr_pdf(file):
             len(result),
             flush=True
         )
+
         return result
 
     except Exception as error:
@@ -294,6 +343,7 @@ def ocr_pdf(file):
 def extract_docx_text(file):
     try:
         file.seek(0)
+
         document = Document(file)
 
         parts = [
@@ -336,6 +386,7 @@ def normalise_text(text):
         .replace("\r", "\n")
         .replace("\xa0", " ")
     )
+
     return re.sub(r"[ \t]+", " ", text)
 
 
@@ -399,7 +450,10 @@ def detect_course(text):
     ]
 
     for course, alternatives in patterns:
-        if any(pattern in lower for pattern in alternatives):
+        if any(
+            pattern in lower
+            for pattern in alternatives
+        ):
             return course
 
     return "Unknown"
@@ -458,11 +512,20 @@ def detect_nqf_level(text):
 # TARGET STUDY LEVEL
 # ============================================================
 
-def determine_target_study_level(study_level, nqf_level):
-    if study_level in ("Honours", "Postgraduate"):
+def determine_target_study_level(
+    study_level,
+    nqf_level
+):
+    if study_level in (
+        "Honours",
+        "Postgraduate"
+    ):
         return study_level
 
-    if study_level == "Undergraduate" and str(nqf_level) == "7":
+    if (
+        study_level == "Undergraduate"
+        and str(nqf_level) == "7"
+    ):
         return "Honours"
 
     return study_level
@@ -476,7 +539,11 @@ def extract_marks(text):
     marks = []
 
     for line in text.splitlines():
-        clean = re.sub(r"\s+", " ", line.strip())
+        clean = re.sub(
+            r"\s+",
+            " ",
+            line.strip()
+        )
 
         matches = re.findall(
             r"\b(100|[4-9]\d)\s*%?\s+"
@@ -511,13 +578,21 @@ def extract_marks_fallback(text):
     )
 
     for line in text.splitlines():
-        clean = re.sub(r"\s+", " ", line.strip())
+        clean = re.sub(
+            r"\s+",
+            " ",
+            line.strip()
+        )
+
         lower = clean.lower()
 
         if not clean:
             continue
 
-        if any(word in lower for word in ignored_words):
+        if any(
+            word in lower
+            for word in ignored_words
+        ):
             continue
 
         matched = re.findall(
@@ -539,6 +614,7 @@ def extract_marks_fallback(text):
                 r"\b(100|\d{1,2})\s*%",
                 clean
             )
+
             marks.extend(int(n) for n in grades)
 
     print("Fallback marks found:", len(marks))
@@ -554,10 +630,14 @@ def _academic_score(text):
     Compare ordinary PDF extraction with OCR.
     Do not expose student information in the logs.
     """
+
     if not text.strip():
         return 0
 
-    marks = extract_marks(text) or extract_marks_fallback(text)
+    marks = (
+        extract_marks(text)
+        or extract_marks_fallback(text)
+    )
 
     score = 10 * len(marks)
 
@@ -587,25 +667,37 @@ def extract_transcript_text(file, filename):
 
     if lower.endswith(".pdf"):
         file.seek(0)
+
         normal = extract_pdf_text(file)
 
         normal_score = _academic_score(normal)
-        print("Normal extraction score:", normal_score)
+
+        print(
+            "Normal extraction score:",
+            normal_score
+        )
 
         normal_marks = (
             extract_marks(normal)
             or extract_marks_fallback(normal)
         )
 
-        # OCR is used when normal extraction misses marks.
-        if len(normal.strip()) < 100 or not normal_marks:
+        if (
+            len(normal.strip()) < 100
+            or not normal_marks
+        ):
             print("Trying OCR for academic marks")
+
             file.seek(0)
 
             scanned = ocr_pdf(file)
+
             scanned_score = _academic_score(scanned)
 
-            print("OCR extraction score:", scanned_score)
+            print(
+                "OCR extraction score:",
+                scanned_score
+            )
 
             if scanned.strip() and (
                 scanned_score > normal_score
@@ -631,20 +723,29 @@ def calculate_average(marks):
     if not marks:
         return None
 
-    return round(sum(marks) / len(marks), 2)
+    return round(
+        sum(marks) / len(marks),
+        2
+    )
 
 
 # ============================================================
 # COURSE MATCHING
 # ============================================================
 
-def course_matches(course, bursary_courses):
+def course_matches(
+    course,
+    bursary_courses
+):
     lower = course.lower()
 
     for item in bursary_courses:
         item_lower = item.lower()
 
-        if item_lower in lower or lower in item_lower:
+        if (
+            item_lower in lower
+            or lower in item_lower
+        ):
             return True, item
 
     return False, None
@@ -654,11 +755,15 @@ def course_matches(course, bursary_courses):
 # STUDY LEVEL MATCHING
 # ============================================================
 
-def study_level_matches(study_level, bursary_levels):
+def study_level_matches(
+    study_level,
+    bursary_levels
+):
     lower = study_level.lower()
 
     return any(
-        item.lower() in lower or lower in item.lower()
+        item.lower() in lower
+        or lower in item.lower()
         for item in bursary_levels
     )
 
@@ -738,12 +843,19 @@ def find_matching_bursaries(
             and average_match
         )
 
-        if course_match and level_match and not average_match:
+        if (
+            course_match
+            and level_match
+            and not average_match
+        ):
             status = "Below Academic Minimum"
+
         elif potential_match:
             status = "Potential Match"
+
         elif course_match:
             status = "Check Eligibility"
+
         else:
             status = "Not Matched"
 
@@ -804,18 +916,38 @@ def analyse_transcript(file, filename):
 
     average = calculate_average(marks)
 
-    bursaries = find_matching_bursaries(
-        course,
-        study_level,
-        target,
-        average
-    )
+    # Do not display bursaries without usable
+    # academic information.
+    if (
+        course == "Unknown"
+        or study_level == "Unknown"
+        or not marks
+    ):
+        bursaries = []
+    else:
+        bursaries = find_matching_bursaries(
+            course,
+            study_level,
+            target,
+            average
+        )
 
-    # Do not expose private academic data in Render logs.
-    print("Course recognition:", course != "Unknown")
-    print("Study level recognition:", study_level != "Unknown")
-    print("Number of marks:", len(marks))
-    print("Bursary entries considered:", len(bursaries))
+    print(
+        "Course recognition:",
+        course != "Unknown"
+    )
+    print(
+        "Study level recognition:",
+        study_level != "Unknown"
+    )
+    print(
+        "Number of marks:",
+        len(marks)
+    )
+    print(
+        "Bursary entries considered:",
+        len(bursaries)
+    )
 
     return {
         "course": course,
