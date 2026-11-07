@@ -19,5 +19,5 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
-
+ENV PYTHONUNBUFFERED=1
 CMD ["sh", "-c", "gunicorn --capture-output --enable-stdio-inheritance --bind 0.0.0.0:${PORT:-10000} app:app"]
