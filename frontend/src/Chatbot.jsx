@@ -355,57 +355,105 @@ export default function Chatbot({ user, onLogout }) {
    * ==============================
    */
 
-  useEffect(() => {
-    const SpeechRecognition =
-      window.SpeechRecognition ||
-      window.webkitSpeechRecognition;
+  
+useEffect(() => {
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
 
-    if (!SpeechRecognition) {
-      setSpeechSupported(false);
-      return undefined;
+  if (!SpeechRecognition) {
+    setSpeechSupported(false);
+    return undefined;
+  }
+
+  setSpeechSupported(true);
+
+  const recognition = new SpeechRecognition();
+
+  recognition.continuous = false;
+
+  // Show speech as it is being recognised.
+  recognition.interimResults = true;
+
+  recognition.maxAlternatives = 1;
+
+  // Use English recognition.
+  recognition.lang = "en-US";
+
+  recognition.onstart = () => {
+    console.log("Speech recognition started");
+    setIsListening(true);
+  };
+
+  recognition.onaudiostart = () => {
+    console.log("Microphone audio detected");
+  };
+
+  recognition.onspeechstart = () => {
+    console.log("Speech detected");
+  };
+
+  recognition.onresult = (event) => {
+    let transcript = "";
+
+    for (
+      let i = event.resultIndex;
+      i < event.results.length;
+      i++
+    ) {
+      transcript += event.results[i][0].transcript;
     }
 
-    const recognition = new SpeechRecognition();
+    if (transcript.trim()) {
+      setInput(transcript.trim());
+    }
 
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = "en-ZA";
+    console.log(
+      "Recognised speech:",
+      transcript
+    );
+  };
 
-    recognition.onstart = () => {
-      setIsListening(true);
-    };
+  recognition.onerror = (event) => {
+    console.error(
+      "Speech recognition error:",
+      event.error,
+      event.message
+    );
 
-    recognition.onresult = (event) => {
-      const transcript =
-        event.results[0][0].transcript;
+    setIsListening(false);
 
-      setInput((previous) =>
-        previous
-          ? `${previous} ${transcript}`
-          : transcript
+    if (event.error === "not-allowed") {
+      alert(
+        "Microphone access is blocked. Please allow microphone access in your browser."
       );
-    };
-
-    recognition.onerror = (event) => {
-      console.error(
-        "Speech recognition error:",
-        event.error
+    } else if (event.error === "no-speech") {
+      console.warn(
+        "No speech was detected. Try speaking closer to your microphone."
       );
+    } else if (event.error === "network") {
+      console.warn(
+        "Speech recognition network error. Check your internet connection."
+      );
+    }
+  };
 
-      setIsListening(false);
-    };
+  recognition.onspeechend = () => {
+    console.log("Speech ended");
+  };
 
-    recognition.onend = () => {
-      setIsListening(false);
-    };
+  recognition.onend = () => {
+    console.log("Speech recognition stopped");
+    setIsListening(false);
+  };
 
-    recognitionRef.current = recognition;
+  recognitionRef.current = recognition;
 
-    return () => {
-      recognition.stop();
-      recognitionRef.current = null;
-    };
-  }, []);
+  return () => {
+    recognition.abort();
+    recognitionRef.current = null;
+  };
+}, []);
 
   /*
    * ==============================
