@@ -1,5 +1,6 @@
-import re
+
 import os
+import re
 
 from pypdf import PdfReader
 from docx import Document
@@ -14,9 +15,7 @@ try:
     from PIL import Image, ImageOps, ImageEnhance
 except ImportError:
     pytesseract = None
-    Image = None
-    ImageOps = None
-    ImageEnhance = None
+    Image = ImageOps = ImageEnhance = None
 
 
 # ============================================================
@@ -24,63 +23,43 @@ except ImportError:
 # ============================================================
 
 def configure_tesseract():
-
     if pytesseract is None:
         return False
 
-    possible_paths = [
+    paths = [
         r"C:\Program Files\Tesseract-OCR\tesseract.exe",
         r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
     ]
 
-    for path in possible_paths:
-
+    for path in paths:
         if os.path.exists(path):
-
             pytesseract.pytesseract.tesseract_cmd = path
-
-            print("Tesseract found:", path)
-
             return True
 
     try:
-
         pytesseract.get_tesseract_version()
-
-        print("Tesseract found in system PATH.")
-
         return True
-
     except Exception:
-
-        print("WARNING: Tesseract OCR was not found.")
-
+        print("Tesseract OCR is unavailable")
         return False
 
 
 # ============================================================
-# REAL BURSARIES / FUNDING OPPORTUNITIES
+# EXISTING BURSARIES
+# Application dates and eligibility must be verified.
 # ============================================================
 
 BURSARIES = [
-
     {
         "id": 1,
-
         "name": "CSIR Bursary Programme",
-
-        "provider": (
-            "Council for Scientific and Industrial Research (CSIR)"
-        ),
-
+        "provider": "Council for Scientific and Industrial Research (CSIR)",
         "description": (
             "The CSIR Bursary Programme provides financial support "
             "for qualifying full-time students in priority science, "
             "engineering and technology fields. Honours-level "
-            "study areas include selected engineering and technology "
-            "fields."
+            "study areas include selected engineering and technology fields."
         ),
-
         "courses": [
             "computer engineering",
             "electronic engineering",
@@ -91,41 +70,25 @@ BURSARIES = [
             "civil engineering",
             "geoinformatics",
             "engineering",
-            "technology"
+            "technology",
         ],
-
         "minimum_average": 65,
-
-        "study_levels": [
-            "honours",
-            "postgraduate"
-        ],
-
+        "study_levels": ["honours", "postgraduate"],
         "url": (
             "https://www.csir.co.za/careers/"
-            "students-graduates/bursaries/"
-            "2026-bursary-programme"
-        )
+            "students-graduates/bursaries/2026-bursary-programme"
+        ),
     },
-
-
     {
         "id": 2,
-
         "name": "DSTI-NRF Honours Student Funding",
-
-        "provider": (
-            "National Research Foundation (NRF)"
-        ),
-
+        "provider": "National Research Foundation (NRF)",
         "description": (
-            "DSTI-NRF Honours funding supports eligible students "
-            "undertaking Honours studies in Science, Engineering "
-            "and Technology and other supported fields. The 2027 "
-            "call lists a minimum academic requirement of 65% "
-            "for major subjects in the final undergraduate year."
+            "DSTI-NRF Honours funding supports eligible students undertaking "
+            "Honours studies in Science, Engineering and Technology and other "
+            "supported fields. The 2027 call lists a minimum academic "
+            "requirement of 65% for major subjects in the final undergraduate year."
         ),
-
         "courses": [
             "computer engineering",
             "electronic engineering",
@@ -137,42 +100,26 @@ BURSARIES = [
             "engineering technology",
             "engineering",
             "technology",
-            "science"
+            "science",
         ],
-
         "minimum_average": 65,
-
-        "study_levels": [
-            "honours",
-            "postgraduate"
-        ],
-
+        "study_levels": ["honours", "postgraduate"],
         "url": (
             "https://www.nrf.ac.za/"
             "announcement-of-call-dsti-nrf-honours-"
             "student-funding-for-the-academic-year-2027/"
-        )
+        ),
     },
-
-
     {
         "id": 3,
-
         "name": "CSIR-DSTI Inter-Programme Bursary Scheme",
-
-        "provider": (
-            "CSIR / Department of Science, "
-            "Technology and Innovation"
-        ),
-
+        "provider": "CSIR / Department of Science, Technology and Innovation",
         "description": (
             "The CSIR-DSTI Inter-Programme Bursary Scheme supports "
-            "full-time Honours, fourth-year Engineering, "
-            "Postgraduate Diploma, Masters and PhD studies at "
-            "South African public universities in specified "
-            "research areas."
+            "full-time Honours, fourth-year Engineering, Postgraduate Diploma, "
+            "Masters and PhD studies at South African public universities "
+            "in specified research areas."
         ),
-
         "courses": [
             "computer engineering",
             "electronic engineering",
@@ -180,468 +127,184 @@ BURSARIES = [
             "engineering",
             "computer science",
             "information technology",
-            "technology"
+            "technology",
         ],
-
         "minimum_average": 65,
-
-        "study_levels": [
-            "honours",
-            "postgraduate"
-        ],
-
+        "study_levels": ["honours", "postgraduate"],
         "url": (
             "https://www.csir.co.za/careers/"
             "students-graduates/dsi-inter-programme-bursary"
-        )
-    }
-
+        ),
+    },
 ]
 
 
 # ============================================================
-# PDF TEXT EXTRACTION
+# NORMAL PDF TEXT EXTRACTION
 # ============================================================
 
 def extract_pdf_text(file):
-
     try:
-
         file.seek(0)
-
         reader = PdfReader(file)
-
         pages = []
 
-        print(
-            "PDF pages detected by normal extractor:",
-            len(reader.pages)
-        )
+        print("PDF pages:", len(reader.pages))
 
-        for page_number, page in enumerate(reader.pages):
-
+        for number, page in enumerate(reader.pages, start=1):
             try:
-
                 text = page.extract_text() or ""
 
                 print(
-                    f"Normal PDF extraction - page "
-                    f"{page_number + 1}: {len(text)} characters"
+                    f"PDF page {number}: {len(text)} characters"
                 )
 
                 if text.strip():
-
                     pages.append(text)
 
             except Exception as error:
-
                 print(
-                    f"Could not extract page "
-                    f"{page_number + 1}:",
-                    error
+                    "PDF page extraction failed:",
+                    type(error).__name__
                 )
 
-        extracted_text = "\n".join(pages)
+        extracted = "\n".join(pages)
 
-        print(
-            "Total normal PDF text:",
-            len(extracted_text)
-        )
-
-        return extracted_text
+        print("Normal PDF text length:", len(extracted))
+        return extracted
 
     except Exception as error:
-
         print(
             "Normal PDF extraction failed:",
-            error
+            type(error).__name__
         )
-
         return ""
 
 
 # ============================================================
-# OCR PDF
+# OCR PDF (FOR SCANNED DOCUMENTS)
 # ============================================================
 
 def ocr_pdf(file):
-
-    if pymupdf is None:
-
-        print(
-            "PyMuPDF is not installed. "
-            "Run: pip install pymupdf"
-        )
-
-        return ""
-
-    if pytesseract is None or Image is None:
-
-        print(
-            "OCR libraries are not installed. "
-            "Run: pip install pytesseract pillow"
-        )
-
+    if pymupdf is None or pytesseract is None or Image is None:
+        print("OCR Python libraries are unavailable")
         return ""
 
     if not configure_tesseract():
-
-        print(
-            "Tesseract OCR is not installed or cannot be found."
-        )
-
         return ""
 
+    pdf = None
+
     try:
-
-        # ----------------------------------------------------
-        # READ UPLOADED PDF
-        # ----------------------------------------------------
-
         file.seek(0)
 
-        pdf_data = file.read()
-
-        print(
-            "\n========================================"
-        )
-
-        print(
-            "UPLOADED PDF INFORMATION"
-        )
-
-        print(
-            "File size:",
-            len(pdf_data),
-            "bytes"
-        )
-
-        print(
-            "========================================"
-        )
-
-        # ----------------------------------------------------
-        # OPEN PDF
-        # ----------------------------------------------------
-
         pdf = pymupdf.open(
-            stream=pdf_data,
+            stream=file.read(),
             filetype="pdf"
         )
 
-        page_count = len(pdf)
+        pages = []
 
-        print(
-            "PDF PAGE COUNT:",
-            page_count
-        )
+        print("OCR PDF page count:", len(pdf))
 
-        if page_count == 0:
-
-            print(
-                "ERROR: PDF contains no pages."
-            )
-
-            pdf.close()
-
-            return ""
-
-        all_pages = []
-
-        print(
-            "\n========================================"
-        )
-
-        print(
-            "STARTING OCR"
-        )
-
-        print(
-            "Processing ALL PDF pages..."
-        )
-
-        print(
-            "========================================"
-        )
-
-        # ----------------------------------------------------
-        # PROCESS EVERY PAGE
-        # ----------------------------------------------------
-
-        for page_number in range(page_count):
-
-            page = pdf[page_number]
-
-            print(
-                f"\nOCR processing page "
-                f"{page_number + 1} of {page_count}..."
-            )
-
-            print(
-                "Page dimensions:",
-                page.rect.width,
-                "x",
-                page.rect.height
-            )
-
-            # ------------------------------------------------
-            # RENDER PAGE
-            # ------------------------------------------------
-
-            matrix = pymupdf.Matrix(
-                3,
-                3
-            )
-
-            pixmap = page.get_pixmap(
-                matrix=matrix,
-                alpha=False
-            )
-
-            image = Image.frombytes(
-                "RGB",
-                [
-                    pixmap.width,
-                    pixmap.height
-                ],
-                pixmap.samples
-            )
-
-            # ------------------------------------------------
-            # IMAGE PRE-PROCESSING
-            # ------------------------------------------------
-
-            image = ImageOps.grayscale(
-                image
-            )
-
-            image = ImageEnhance.Contrast(
-                image
-            ).enhance(2.0)
-
-            image = ImageEnhance.Sharpness(
-                image
-            ).enhance(2.0)
-
-            # ------------------------------------------------
-            # OCR
-            # ------------------------------------------------
-
-            text = pytesseract.image_to_string(
-                image,
-                config="--oem 3 --psm 6",
-                lang="eng"
-            )
-
-            print(
-                f"OCR page {page_number + 1}: "
-                f"{len(text)} characters"
-            )
-
-            print(
-                "OCR preview:"
-            )
-
-            print(
-                text[:1500]
-            )
-
-            # ------------------------------------------------
-            # STORE PAGE TEXT
-            # ------------------------------------------------
-
-            if text.strip():
-
-                all_pages.append(
-                    text
+        for number, page in enumerate(pdf, start=1):
+            try:
+                # Moderate resolution for Render memory.
+                pix = page.get_pixmap(
+                    matrix=pymupdf.Matrix(2, 2),
+                    alpha=False
                 )
 
-        # ----------------------------------------------------
-        # CLOSE PDF
-        # ----------------------------------------------------
+                img = Image.frombytes(
+                    "RGB",
+                    (pix.width, pix.height),
+                    pix.samples
+                )
 
-        pdf.close()
+                img = ImageOps.grayscale(img)
 
-        # ----------------------------------------------------
-        # COMBINE ALL PAGES
-        # ----------------------------------------------------
+                img = ImageEnhance.Contrast(
+                    img
+                ).enhance(2.0)
 
-        full_text = "\n".join(
-            all_pages
-        )
+                img = ImageEnhance.Sharpness(
+                    img
+                ).enhance(2.0)
 
-        print(
-            "\n========================================"
-        )
+                text = pytesseract.image_to_string(
+                    img,
+                    config="--oem 3 --psm 6",
+                    lang="eng"
+                )
 
-        print(
-            "OCR COMPLETE"
-        )
+                print(
+                    f"OCR page {number}: {len(text)} characters"
+                )
 
-        print(
-            "Pages processed:",
-            page_count
-        )
+                if text.strip():
+                    pages.append(text)
 
-        print(
-            "Pages containing text:",
-            len(all_pages)
-        )
+            except Exception as error:
+                print(
+                    "OCR page failed:",
+                    type(error).__name__
+                )
 
-        print(
-            "Total OCR text:",
-            len(full_text)
-        )
+        result = "\n".join(pages)
 
-        print(
-            "========================================"
-        )
-
-        return full_text
+        print("Total OCR text length:", len(result))
+        return result
 
     except Exception as error:
-
         print(
             "OCR extraction failed:",
-            error
+            type(error).__name__
         )
-
         return ""
+
+    finally:
+        if pdf is not None:
+            pdf.close()
 
 
 # ============================================================
-# DOCX EXTRACTION
+# WORD DOCUMENT EXTRACTION
 # ============================================================
 
 def extract_docx_text(file):
-
     try:
-
         file.seek(0)
 
         document = Document(file)
 
-        parts = []
-
-        for paragraph in document.paragraphs:
-
-            if paragraph.text.strip():
-
-                parts.append(
-                    paragraph.text
-                )
+        parts = [
+            p.text
+            for p in document.paragraphs
+            if p.text.strip()
+        ]
 
         for table in document.tables:
-
             for row in table.rows:
+                cells = [
+                    c.text.strip()
+                    for c in row.cells
+                    if c.text.strip()
+                ]
 
-                row_text = []
+                if cells:
+                    parts.append(" ".join(cells))
 
-                for cell in row.cells:
+        text = "\n".join(parts)
 
-                    if cell.text.strip():
-
-                        row_text.append(
-                            cell.text.strip()
-                        )
-
-                if row_text:
-
-                    parts.append(
-                        " ".join(row_text)
-                    )
-
-        text = "\n".join(
-            parts
-        )
-
-        print(
-            "DOCX extracted text:",
-            len(text),
-            "characters"
-        )
-
+        print("DOCX text length:", len(text))
         return text
 
     except Exception as error:
-
         print(
             "DOCX extraction failed:",
-            error
+            type(error).__name__
         )
-
         return ""
-
-
-# ============================================================
-# MAIN FILE EXTRACTION
-# ============================================================
-
-def extract_transcript_text(
-    file,
-    filename
-):
-
-    filename_lower = filename.lower()
-
-    print(
-        "\n========================================"
-    )
-
-    print(
-        "STARTING TRANSCRIPT EXTRACTION"
-    )
-
-    print(
-        "File:",
-        filename
-    )
-
-    print(
-        "========================================"
-    )
-
-    if filename_lower.endswith(".pdf"):
-
-        text = extract_pdf_text(
-            file
-        )
-
-        if text.strip():
-
-            print(
-                "Normal PDF text was found."
-            )
-
-            return text
-
-        print(
-            "No selectable PDF text found."
-        )
-
-        print(
-            "This appears to be a scanned PDF."
-        )
-
-        print(
-            "Starting OCR..."
-        )
-
-        return ocr_pdf(
-            file
-        )
-
-    if filename_lower.endswith(".docx"):
-
-        return extract_docx_text(
-            file
-        )
-
-    print(
-        "Unsupported file type."
-    )
-
-    return ""
 
 
 # ============================================================
@@ -649,28 +312,13 @@ def extract_transcript_text(
 # ============================================================
 
 def normalise_text(text):
-
-    if not text:
-
-        return ""
-
-    text = text.replace(
-        "\r",
-        "\n"
+    text = (
+        (text or "")
+        .replace("\r", "\n")
+        .replace("\xa0", " ")
     )
 
-    text = text.replace(
-        "\xa0",
-        " "
-    )
-
-    text = re.sub(
-        r"[ \t]+",
-        " ",
-        text
-    )
-
-    return text
+    return re.sub(r"[ \t]+", " ", text)
 
 
 # ============================================================
@@ -678,20 +326,19 @@ def normalise_text(text):
 # ============================================================
 
 def detect_course(text):
+    lower = normalise_text(text).lower()
 
-    text_lower = text.lower()
-
-    course_patterns = [
-
+    patterns = [
         (
             "Computer Engineering",
             [
                 "computer engineering",
                 "bachelor of engineering technology in computer engineering",
-                "engineering technology in computer engineering"
+                "engineering technology in computer engineering",
+                "bengtech computer engineering",
+                "beng tech computer engineering",
             ]
         ),
-
         (
             "Electronic Engineering",
             [
@@ -699,80 +346,46 @@ def detect_course(text):
                 "electronics engineering"
             ]
         ),
-
         (
             "Electrical Engineering",
-            [
-                "electrical engineering"
-            ]
+            ["electrical engineering"]
         ),
-
         (
             "Software Engineering",
-            [
-                "software engineering"
-            ]
+            ["software engineering"]
         ),
-
         (
             "Computer Science",
-            [
-                "computer science"
-            ]
+            ["computer science"]
         ),
-
         (
             "Information Technology",
-            [
-                "information technology"
-            ]
+            ["information technology"]
         ),
-
         (
             "Information Systems",
-            [
-                "information systems"
-            ]
+            ["information systems"]
         ),
-
         (
             "Engineering Technology",
-            [
-                "engineering technology"
-            ]
+            ["engineering technology"]
         ),
-
         (
             "Engineering",
-            [
-                "engineering"
-            ]
+            ["engineering"]
         ),
-
         (
             "Technology",
-            [
-                "technology"
-            ]
-        )
+            ["technology"]
+        ),
     ]
 
-    for course_name, patterns in course_patterns:
-
-        for pattern in patterns:
-
-            if pattern in text_lower:
-
-                print(
-                    "Course detected:",
-                    course_name
-                )
-
-                return course_name
-
-    print(
-        "Course could not be detected."
-    )
+    for course, alternatives in patterns:
+        if any(
+            pattern in lower
+            for pattern in alternatives
+        ):
+            return course
 
     return "Unknown"
 
@@ -782,52 +395,48 @@ def detect_course(text):
 # ============================================================
 
 def detect_study_level(text):
+    lower = text.lower()
 
-    text_lower = text.lower()
-
-    if (
-        "honours" in text_lower
-        or "honors" in text_lower
-        or "beng tech hons" in text_lower
-        or "bachelor honours" in text_lower
-    ):
-
-        print(
-            "Current study level detected: Honours"
-        )
-
+    if any(s in lower for s in (
+        "honours",
+        "honors",
+        "beng tech hons",
+        "bachelor honours"
+    )):
         return "Honours"
 
-    if (
-        "postgraduate" in text_lower
-        or "master" in text_lower
-        or "doctoral" in text_lower
-        or "phd" in text_lower
-    ):
-
-        print(
-            "Current study level detected: Postgraduate"
-        )
-
+    if any(s in lower for s in (
+        "postgraduate",
+        "master",
+        "doctoral",
+        "phd"
+    )):
         return "Postgraduate"
 
-    if (
-        "bachelor" in text_lower
-        or "undergraduate" in text_lower
-        or "nqf exit level 7" in text_lower
-    ):
-
-        print(
-            "Current study level detected: Undergraduate"
-        )
-
+    if any(s in lower for s in (
+        "bachelor",
+        "undergraduate",
+        "nqf exit level 7",
+        "bengtech",
+        "beng tech"
+    )):
         return "Undergraduate"
 
-    print(
-        "Study level could not be detected."
+    return "Unknown"
+
+
+# ============================================================
+# NQF LEVEL DETECTION
+# ============================================================
+
+def detect_nqf_level(text):
+    match = re.search(
+        r"NQF\s*(?:EXIT\s*)?LEVEL\s*[:\-]?\s*(\d+)",
+        text,
+        re.I
     )
 
-    return "Unknown"
+    return match.group(1) if match else None
 
 
 # ============================================================
@@ -838,185 +447,210 @@ def determine_target_study_level(
     study_level,
     nqf_level
 ):
-
-    if study_level in [
+    if study_level in (
         "Honours",
         "Postgraduate"
-    ]:
-
+    ):
         return study_level
 
     if (
         study_level == "Undergraduate"
         and str(nqf_level) == "7"
     ):
-
-        print(
-            "Target study level for funding: Honours"
-        )
-
         return "Honours"
 
     return study_level
 
 
 # ============================================================
-# NQF LEVEL DETECTION
-# ============================================================
-
-def detect_nqf_level(text):
-
-    match = re.search(
-        r"NQF\s+(?:EXIT\s+)?LEVEL\s+(\d+)",
-        text,
-        re.IGNORECASE
-    )
-
-    if match:
-
-        level = match.group(1)
-
-        print(
-            "NQF level detected:",
-            level
-        )
-
-        return level
-
-    return None
-
-
-# ============================================================
-# EXTRACT MARKS
+# MARK DETECTION
 # ============================================================
 
 def extract_marks(text):
-
     marks = []
 
-    lines = text.splitlines()
-
-    for line in lines:
-
-        original_line = line.strip()
-
-        if not original_line:
-            continue
-
-        line_clean = re.sub(
-            r"\s+",
-            " ",
-            original_line
-        )
-
-        match = re.search(
-            r"\b(4[0-9]|[5-9][0-9]|100)\s+"
-            r"PASS\b",
-            line_clean,
-            re.IGNORECASE
-        )
-
-        if match:
-
-            mark = int(
-                match.group(1)
-            )
-
-            # IMPORTANT:
-            # Do not remove duplicate marks.
-            # Two different subjects can have the same mark.
-
-            marks.append(
-                mark
-            )
-
-            print(
-                "Mark detected:",
-                mark,
-                "|",
-                line_clean
-            )
-
-    print(
-        "PASS-based marks found:",
-        marks
-    )
-
-    return marks
-
-
-# ============================================================
-# FALLBACK MARK EXTRACTION
-# ============================================================
-
-def extract_marks_fallback(text):
-
-    marks = []
-
-    lines = text.splitlines()
-
-    for line in lines:
-
-        clean_line = re.sub(
+    for line in text.splitlines():
+        clean = re.sub(
             r"\s+",
             " ",
             line.strip()
         )
 
-        if not clean_line:
+        # Accept PASS, PASSED and an optional % sign.
+        # Repeated subject marks are preserved.
+        matches = re.findall(
+            r"\b(100|[4-9]\d)\s*%?\s+"
+            r"(?:PASS|PASSED)\b",
+            clean,
+            re.I
+        )
+
+        marks.extend(int(m) for m in matches)
+
+    print("PASS-based marks found:", len(marks))
+    return marks
+
+
+# ============================================================
+# FALLBACK MARK DETECTION
+# ============================================================
+
+def extract_marks_fallback(text):
+    marks = []
+
+    ignored_words = (
+        "national level",
+        "national credit",
+        "student number",
+        "identity number",
+        "qualification id",
+        "credit:",
+        "nqf",
+        "date of birth",
+        "year:",
+    )
+
+    for line in text.splitlines():
+        clean = re.sub(
+            r"\s+",
+            " ",
+            line.strip()
+        )
+
+        lower = clean.lower()
+
+        if not clean:
             continue
-
-        lower = clean_line.lower()
-
-        ignored_words = [
-            "national level",
-            "national credit",
-            "student number",
-            "identity number",
-            "qualification id",
-            "credit:",
-            "nqf",
-            "date of birth",
-            "year:"
-        ]
 
         if any(
             word in lower
             for word in ignored_words
         ):
-
             continue
 
-        if "pass" in lower:
+        # Marks next to PASS or PASSED.
+        matched = re.findall(
+            r"\b(100|[4-9]\d)\s*%?\s+"
+            r"(?:PASS|PASSED)\b",
+            clean,
+            re.I
+        )
 
-            possible_numbers = re.findall(
-                r"\b(4[0-9]|[5-9][0-9]|100)\b",
-                clean_line
+        if matched:
+            marks.extend(int(n) for n in matched)
+            continue
+
+        # Marks written as percentages on labelled lines.
+        if re.search(
+            r"\b(module|subject|result|mark|final)\b",
+            lower
+        ):
+            grades = re.findall(
+                r"\b(100|\d{1,2})\s*%",
+                clean
             )
 
-            for number in possible_numbers:
+            marks.extend(int(n) for n in grades)
 
-                mark = int(
-                    number
-                )
+    print("Fallback marks found:", len(marks))
+    return marks
 
-                marks.append(
-                    mark
-                )
 
-                print(
-                    "Fallback mark detected:",
-                    mark,
-                    "|",
-                    clean_line
-                )
+# ============================================================
+# CHECK EXTRACTION QUALITY
+# ============================================================
 
-    print(
-        "Fallback marks found:",
-        marks
+def _academic_score(text):
+    """
+    Compare ordinary PDF extraction with OCR.
+    Do not expose student information in the logs.
+    """
+
+    if not text.strip():
+        return 0
+
+    marks = (
+        extract_marks(text)
+        or extract_marks_fallback(text)
     )
 
-    return marks
+    score = 10 * len(marks)
+
+    if detect_course(text) != "Unknown":
+        score += 5
+
+    if detect_study_level(text) != "Unknown":
+        score += 3
+
+    if detect_nqf_level(text):
+        score += 2
+
+    return score
+
+
+# ============================================================
+# MAIN FILE EXTRACTION - UPDATED
+# ============================================================
+
+def extract_transcript_text(file, filename):
+    lower = filename.lower().strip()
+
+    print(
+        "Starting transcript extraction, type:",
+        lower.rsplit(".", 1)[-1]
+    )
+
+    if lower.endswith(".pdf"):
+        file.seek(0)
+
+        normal = extract_pdf_text(file)
+
+        normal_score = _academic_score(normal)
+
+        print(
+            "Normal extraction score:",
+            normal_score
+        )
+
+        normal_marks = (
+            extract_marks(normal)
+            or extract_marks_fallback(normal)
+        )
+
+        # Some PDFs have readable headings but
+        # scanned tables containing the marks.
+        # Try OCR when normal extraction misses marks.
+        if (
+            len(normal.strip()) < 100
+            or not normal_marks
+        ):
+            print("Trying OCR for academic marks")
+
+            file.seek(0)
+
+            scanned = ocr_pdf(file)
+
+            scanned_score = _academic_score(scanned)
+
+            print(
+                "OCR extraction score:",
+                scanned_score
+            )
+
+            if scanned.strip() and (
+                scanned_score > normal_score
+                or not normal.strip()
+            ):
+                return scanned
+
+        return normal
+
+    if lower.endswith(".docx"):
+        file.seek(0)
+        return extract_docx_text(file)
+
+    print("Unsupported transcript file type")
+    return ""
 
 
 # ============================================================
@@ -1024,24 +658,13 @@ def extract_marks_fallback(text):
 # ============================================================
 
 def calculate_average(marks):
-
     if not marks:
-
         return None
 
-    average = sum(marks) / len(marks)
-
-    average = round(
-        average,
+    return round(
+        sum(marks) / len(marks),
         2
     )
-
-    print(
-        "Academic average:",
-        average
-    )
-
-    return average
 
 
 # ============================================================
@@ -1052,21 +675,16 @@ def course_matches(
     course,
     bursary_courses
 ):
+    lower = course.lower()
 
-    course_lower = course.lower()
-
-    for bursary_course in bursary_courses:
-
-        bursary_course_lower = (
-            bursary_course.lower()
-        )
+    for item in bursary_courses:
+        item_lower = item.lower()
 
         if (
-            bursary_course_lower in course_lower
-            or course_lower in bursary_course_lower
+            item_lower in lower
+            or lower in item_lower
         ):
-
-            return True, bursary_course
+            return True, item
 
     return False, None
 
@@ -1079,23 +697,13 @@ def study_level_matches(
     study_level,
     bursary_levels
 ):
+    lower = study_level.lower()
 
-    level_lower = study_level.lower()
-
-    for bursary_level in bursary_levels:
-
-        bursary_level_lower = (
-            bursary_level.lower()
-        )
-
-        if (
-            bursary_level_lower in level_lower
-            or level_lower in bursary_level_lower
-        ):
-
-            return True
-
-    return False
+    return any(
+        item.lower() in lower
+        or lower in item.lower()
+        for item in bursary_levels
+    )
 
 
 # ============================================================
@@ -1108,16 +716,10 @@ def find_matching_bursaries(
     target_study_level,
     average
 ):
-
     results = []
 
     for bursary in BURSARIES:
-
         reasons = []
-
-        # ----------------------------------------------------
-        # COURSE
-        # ----------------------------------------------------
 
         course_match, matched_course = course_matches(
             course,
@@ -1125,22 +727,14 @@ def find_matching_bursaries(
         )
 
         if course_match:
-
             reasons.append(
-                f"Your course is related to "
-                f"{matched_course}."
+                f"Your course is related to {matched_course}."
             )
-
         else:
-
             reasons.append(
-                "Your detected course does not "
-                "match the listed study fields."
+                "Your detected course does not match "
+                "the listed study fields."
             )
-
-        # ----------------------------------------------------
-        # TARGET STUDY LEVEL
-        # ----------------------------------------------------
 
         level_match = study_level_matches(
             target_study_level,
@@ -1148,58 +742,38 @@ def find_matching_bursaries(
         )
 
         if level_match:
-
             reasons.append(
                 f"The funding is available for "
                 f"{target_study_level} study."
             )
-
         else:
-
             reasons.append(
                 f"The detected target study level "
-                f"({target_study_level}) does not "
-                f"match the listed funding level."
+                f"({target_study_level}) does not match "
+                f"the listed funding level."
             )
-
-        # ----------------------------------------------------
-        # AVERAGE
-        # ----------------------------------------------------
 
         average_match = False
 
         if average is not None:
-
             if average >= bursary["minimum_average"]:
-
                 average_match = True
 
                 reasons.append(
-                    f"Your average of {average}% "
-                    f"meets the listed academic "
-                    f"minimum of "
+                    f"Your average of {average}% meets "
+                    f"the listed academic minimum of "
                     f"{bursary['minimum_average']}%."
                 )
-
             else:
-
                 reasons.append(
-                    f"Your average of {average}% "
-                    f"is below the listed academic "
-                    f"minimum of "
+                    f"Your average of {average}% is below "
+                    f"the listed academic minimum of "
                     f"{bursary['minimum_average']}%."
                 )
-
         else:
-
             reasons.append(
-                "An academic average could not "
-                "be calculated."
+                "An academic average could not be calculated."
             )
-
-        # ----------------------------------------------------
-        # POTENTIAL MATCH
-        # ----------------------------------------------------
 
         potential_match = (
             course_match
@@ -1207,100 +781,51 @@ def find_matching_bursaries(
             and average_match
         )
 
-        # ----------------------------------------------------
-        # STATUS
-        # ----------------------------------------------------
-
         if (
             course_match
             and level_match
             and not average_match
         ):
-
             status = "Below Academic Minimum"
 
         elif potential_match:
-
             status = "Potential Match"
 
         elif course_match:
-
             status = "Check Eligibility"
 
         else:
-
             status = "Not Matched"
 
-        # ----------------------------------------------------
-        # RESULT
-        # ----------------------------------------------------
-
-        results.append(
-            {
-                "id": bursary["id"],
-
-                "name": bursary["name"],
-
-                "provider": bursary["provider"],
-
-                "description": bursary["description"],
-
-                "minimum_average": (
-                    bursary["minimum_average"]
-                ),
-
-                "url": bursary["url"],
-
-                "official_url": bursary["url"],
-
-                "potential_match": potential_match,
-
-                "status": status,
-
-                "reasons": reasons
-            }
-        )
+        results.append({
+            "id": bursary["id"],
+            "name": bursary["name"],
+            "provider": bursary["provider"],
+            "description": bursary["description"],
+            "minimum_average": bursary["minimum_average"],
+            "url": bursary["url"],
+            "official_url": bursary["url"],
+            "potential_match": potential_match,
+            "status": status,
+            "reasons": reasons,
+        })
 
     return results
 
 
 # ============================================================
-# MAIN ANALYSIS FUNCTION
+# MAIN BURSARY ANALYSIS
 # ============================================================
 
-def analyse_transcript(
-    file,
-    filename
-):
+def analyse_transcript(file, filename):
+    print("Starting EMMY bursary analysis")
 
-    print("\n")
-
-    print(
-        "=============================================="
-    )
-
-    print(
-        "EMMY BURSARY & FUNDING ANALYSIS"
-    )
-
-    print(
-        "=============================================="
-    )
-
-    # --------------------------------------------------------
-    # EXTRACT TEXT
-    # --------------------------------------------------------
-
-    text = extract_transcript_text(
-        file,
-        filename
+    text = normalise_text(
+        extract_transcript_text(file, filename)
     )
 
     if not text.strip():
-
-        print(
-            "ERROR: No text could be extracted."
-        )
+        print("No readable transcript text")
 
         return {
             "course": "Unknown",
@@ -1310,205 +835,60 @@ def analyse_transcript(
             "marks_found": 0,
             "average": None,
             "marks": [],
-            "bursaries": []
+            "bursaries": [],
         }
 
-    # --------------------------------------------------------
-    # NORMALISE TEXT
-    # --------------------------------------------------------
+    course = detect_course(text)
 
-    text = normalise_text(
-        text
+    study_level = detect_study_level(text)
+
+    nqf_level = detect_nqf_level(text)
+
+    target = determine_target_study_level(
+        study_level,
+        nqf_level
     )
 
-    print("\n")
-
-    print(
-        "=============================================="
-    )
-
-    print(
-        "EXTRACTED TRANSCRIPT TEXT"
-    )
-
-    print(
-        "=============================================="
-    )
-
-    print(
-        text[:6000]
-    )
-
-    print("\n")
-
-    print(
-        "=============================================="
-    )
-
-    print(
-        "DETECTING ACADEMIC INFORMATION"
-    )
-
-    print(
-        "=============================================="
-    )
-
-    # --------------------------------------------------------
-    # COURSE
-    # --------------------------------------------------------
-
-    course = detect_course(
-        text
-    )
-
-    # --------------------------------------------------------
-    # CURRENT STUDY LEVEL
-    # --------------------------------------------------------
-
-    study_level = detect_study_level(
-        text
-    )
-
-    # --------------------------------------------------------
-    # NQF
-    # --------------------------------------------------------
-
-    nqf_level = detect_nqf_level(
-        text
-    )
-
-    # --------------------------------------------------------
-    # TARGET STUDY LEVEL
-    # --------------------------------------------------------
-
-    target_study_level = (
-        determine_target_study_level(
-            study_level,
-            nqf_level
-        )
-    )
-
-    # --------------------------------------------------------
-    # MARKS
-    # --------------------------------------------------------
-
-    marks = extract_marks(
-        text
-    )
+    marks = extract_marks(text)
 
     if not marks:
+        marks = extract_marks_fallback(text)
 
-        print(
-            "PASS-based extraction found no marks."
-        )
-
-        print(
-            "Trying fallback mark extraction..."
-        )
-
-        marks = extract_marks_fallback(
-            text
-        )
-
-    # --------------------------------------------------------
-    # AVERAGE
-    # --------------------------------------------------------
-
-    average = calculate_average(
-        marks
-    )
-
-    # --------------------------------------------------------
-    # BURSARIES
-    # --------------------------------------------------------
+    average = calculate_average(marks)
 
     bursaries = find_matching_bursaries(
         course,
         study_level,
-        target_study_level,
+        target,
         average
     )
 
-    # --------------------------------------------------------
-    # FINAL DEBUG
-    # --------------------------------------------------------
-
-    print("\n")
-
+    # Avoid printing private transcript content
+    # and academic marks into Render logs.
     print(
-        "=============================================="
+        "Course recognition:",
+        course != "Unknown"
     )
-
     print(
-        "FINAL ANALYSIS"
+        "Study level recognition:",
+        study_level != "Unknown"
     )
-
-    print(
-        "=============================================="
-    )
-
-    print(
-        "Course:",
-        course
-    )
-
-    print(
-        "Current Study Level:",
-        study_level
-    )
-
-    print(
-        "Target Study Level:",
-        target_study_level
-    )
-
-    print(
-        "NQF Level:",
-        nqf_level
-    )
-
-    print(
-        "Marks:",
-        marks
-    )
-
     print(
         "Number of marks:",
         len(marks)
     )
-
     print(
-        "Average:",
-        average
-    )
-
-    print(
-        "Bursaries returned:",
+        "Bursary entries considered:",
         len(bursaries)
     )
 
-    print(
-        "=============================================="
-    )
-
-    # --------------------------------------------------------
-    # RETURN RESULT TO FLASK
-    # --------------------------------------------------------
-
     return {
         "course": course,
-
         "study_level": study_level,
-
-        "target_study_level": target_study_level,
-
+        "target_study_level": target,
         "nqf_level": nqf_level,
-
         "marks_found": len(marks),
-
         "marks": marks,
-
         "average": average,
-
-        "bursaries": bursaries
+        "bursaries": bursaries,
     }
