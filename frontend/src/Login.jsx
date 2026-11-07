@@ -130,7 +130,7 @@ function Login({ onLogin }) {
                             <input
                                 id="firstName"
                                 type="text"
-                                placeholder="Ntlaka"
+                                placeholder="Emihle"
                                 value={firstName}
                                 onChange={(e) => setFirstName(e.target.value)}
                             />
@@ -140,7 +140,7 @@ function Login({ onLogin }) {
                             <input
                                 id="lastName"
                                 type="text"
-                                placeholder="Mgaguli"
+                                placeholder="Mkalipi"
                                 value={lastName}
                                 onChange={(e) => setLastName(e.target.value)}
                             />
