@@ -5,6 +5,7 @@ WORKDIR /app
 
 # Prevent Python output from being buffered
 ENV PYTHONUNBUFFERED=1
+ENV OMP_THREAD_LIMIT=1
 
 # Install LibreOffice and Tesseract OCR
 RUN apt-get update && \
@@ -37,6 +38,4 @@ RUN tesseract --version
 COPY . .
 
 # Start the Flask application using Gunicorn
-
 CMD ["sh", "-c", "gunicorn --capture-output --enable-stdio-inheritance --timeout 120 --workers 1 --bind 0.0.0.0:${PORT:-10000} app:app"]
-
